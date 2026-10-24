@@ -21,9 +21,9 @@ Aplicación de consola para consultar disponibilidad, reservar una unidad del in
 
 ## Solución
 
-**Estructura:** `reservation_app.py` contiene la lógica y los comandos de consola; `inventory.json` contiene las cinco unidades iniciales; `tests/` contiene pruebas con `unittest`; `data/reservations.json` se crea al guardar la primera reserva.
+**Estructura y carga inicial:** `reservation_app.py` contiene la lógica y los comandos de consola; `inventory.json` contiene las cinco unidades iniciales y se lee al iniciar cada comando; `tests/` contiene pruebas con `unittest`; `data/reservations.json` se crea al guardar la primera reserva. El inventario es fijo; no hay comandos para agregar, modificar ni eliminar unidades.
 
-**Requisitos y versión:** Python 3.10 o posterior. No hay dependencias de terceros. El inventario se lee junto al programa; el archivo de reservas se guarda por defecto en `data/reservations.json`. Las escrituras reemplazan el archivo mediante un temporal en el mismo directorio. No borres ese archivo para reiniciar la aplicación: contiene el historial. Para probar desde cero, pasa otro `--data-file` temporal.
+**Requisitos y versión:** Python 3.10 o posterior. No hay dependencias de terceros ni pasos de instalación. El archivo de reservas se guarda por defecto en `data/reservations.json`. Las escrituras reemplazan el archivo mediante un temporal en el mismo directorio. No borres ese archivo para reiniciar la aplicación: contiene el historial. No hay un comando de reinicio destructivo; para una prueba limpia, pasa otro `--data-file` temporal.
 
 **Instalación y ejecución** (desde la raíz del proyecto):
 
@@ -39,33 +39,38 @@ python reservation_app.py cancel --id ID_QUE_MUESTRA_LA_RESERVA
 
 Ejemplo de disponibilidad: si `MIC-01` está reservado de 10:00 a 11:00, otra solicitud de 10:30 a 11:30 se rechaza y una de 11:00 a 12:00 se permite. `MIC-02` puede reservarse de 10:00 a 11:00 al mismo tiempo.
 
+Salida real de la prueba de consola registrada en [evidence/episodio-3-cli-smoke.txt](./evidence/episodio-3-cli-smoke.txt):
+
+```text
+Reserva cancelada: res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | cancelled
+res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | cancelled
+res_3743c69cbc12 | MIC-01 (Microscopio digital) | Prueba consecutiva | 2030-04-15T11:00 a 2030-04-15T12:00 | active
+```
+
 **Pendientes y límites:** es una aplicación local para un único proceso; no implementa usuarios reales, roles, interfaz gráfica ni concurrencia distribuida.
 
 ## Preparación del agente
 
-**Entorno:** agente de programación en VS Code con Copilot SDK, actuando sobre los archivos del espacio de trabajo. El identificador y la versión del modelo no fueron visibles en esta sesión, así que no se inventan. Se eligió este entorno porque la consigna pide que el agente trabaje sobre un repositorio con herramientas reales.
+**Entorno y modelo:** agente de programación en VS Code con Copilot SDK, actuando sobre los archivos del espacio de trabajo. El identificador y la versión del modelo no fueron visibles, así que no se inventan. Se eligió este entorno porque la consigna pide que el agente trabaje sobre un repositorio con herramientas reales.
 
-**Instrucciones y contexto:** `.github/copilot-instructions.md` fija reglas específicas de intervalos consecutivos, disponibilidad, cancelación, persistencia y reporte honesto de pruebas. El contexto fue la consigna `challenge-agents.pdf`; se excluyeron credenciales, datos personales reales y servicios externos.
+**Instrucciones, contexto y permisos:** `.github/copilot-instructions.md` fija reglas específicas de intervalos consecutivos, disponibilidad, cancelación, persistencia y reporte honesto de pruebas. El contexto de requisitos es `challenge-agents.pdf`; también se revisaron el código, las pruebas y el inventario. Se excluyeron credenciales, datos personales reales y servicios externos. Para las verificaciones documentadas aquí se usaron Python y comandos locales; la prueba manual escribió en un JSON temporal y no modificó el inventario ni el archivo de reservas predeterminado. El texto exacto de la instrucción original de construcción no quedó preservado, por lo que no se presenta como cita literal.
 
-**Herramientas, controles y adaptación:** el agente leyó la consigna, creó archivos en el espacio de trabajo y ejecutó pruebas locales. La adaptación verificable es la instrucción de modelar intervalos como `[inicio, fin)`, aplicada en `ReservationService._has_conflict` y comprobada por `test_allows_consecutive_reservations`. 
+**Controles, adaptación y retención del progreso:** se revisaron la implementación y las pruebas antes de informar resultados; no se aceptaron cambios de lógica porque la revisión de disponibilidad no encontró una discrepancia. La adaptación verificable es modelar intervalos como `[inicio, fin)`, aplicada en `ReservationService._has_conflict` y comprobada por `test_allows_consecutive_reservations` y `test_availability_uses_the_same_interval_rules`. Las decisiones y resultados se conservan en este README y en la evidencia versionada; los comandos y resultados de persistencia están en `evidence/episodio-3-cli-smoke.txt`.
 
-## Registro de decisiones y delegación
+## Registro de episodios, decisiones y delegación
 
-Registra aquí solo episodios que hayan ocurrido. No pegues conversaciones privadas completas ni inventes fallas, resultados o decisiones. Enlaza los archivos y resultados de la versión que se entrega.
+Se registran acciones ocurridas y resultados comprobables. No se incluyen conversaciones privadas completas ni se inventan fallas, resultados o decisiones.
 
 ### Episodio 1 — Base funcional
 
 - **Objetivo y requisito:** generar una base ejecutable del sistema local de reservas, con consola y almacenamiento JSON.
-- **Contexto e instrucción:** la consigna del PDF y la selección del usuario de crear la base en Python. Se aplicaron las instrucciones de `.github/copilot-instructions.md`.
-- **Acción / resultado del agente:** se crearon la aplicación, el inventario inicial, las pruebas y esta documentación.
-- **Decisión humana:** pendiente de revisión de la persona que entrega; no se afirma aceptación.
-- **Evidencia:** `reservation_app.py`, `inventory.json`, `tests/test_reservation_app.py` y el resultado de `python -m unittest discover -s tests -v` que se debe registrar abajo tras ejecutarlo.
+- **Contexto e instrucción:** el registro inicial del proyecto atribuye la tarea a la consigna oficial y a la selección de Python. El prompt textual original no quedó preservado; esa descripción es un resumen del registro, no una cita literal. Se aplicaron las instrucciones de `.github/copilot-instructions.md`.
+- **Acción / resultado:** la aplicación, el inventario inicial y las pruebas están en el commit `f0dcc85` y en `reservation_app.py`, `inventory.json` y `tests/test_reservation_app.py`.
+- **Revisión del agente:** la suite actual y la verificación de persistencia registradas en este README comprueban el comportamiento principal.
+- **Decisión humana:** aceptado por la persona que entrega el 2026-10-24; confirma la base implementada y la evidencia disponible.
+- **Evidencia:** los archivos listados arriba y el historial Git del repositorio.
 
-### Registro de episodios 2 y 3
-
-El episodio 2 se realizó en esta sesión y se documenta abajo. El episodio 3 sigue pendiente; no se afirma que se haya ejecutado.
-
-#### Episodio 2 — Revisar disponibilidad y límites de intervalos
+### Episodio 2 — Revisar disponibilidad y límites de intervalos
 
 **Objetivo e instrucción:** revisar si la consulta de disponibilidad y la creación de reservas aplican la misma regla para intervalos `[inicio, fin)`, y comprobar superposición, horarios consecutivos y unidades distintas. No cambiar `inventory.json` ni agregar funciones para editar el inventario; si hubiera una carencia, añadir una prueba enfocada y una corrección mínima, y luego ejecutar la suite completa.
 
@@ -73,49 +78,24 @@ El episodio 2 se realizó en esta sesión y se documenta abajo. El episodio 3 si
 
 **Pruebas ejecutadas:** cuatro pruebas enfocadas pasaron: `test_availability_uses_the_same_interval_rules`, `test_rejects_overlapping_active_reservation`, `test_allows_consecutive_reservations` y `test_allows_same_time_on_different_units`. Después, `python -m unittest discover -s tests -v` ejecutó la suite completa: 9 pruebas pasaron. Entorno observado: Python 3.13.14. `git diff --check` no reportó errores.
 
-**Decisión humana:** no se informó una decisión separada sobre aceptar, corregir o rechazar; la revisión no encontró cambios que requirieran esa decisión.
+**Decisión humana:** aceptado por la persona que entrega el 2026-10-24; la revisión y las pruebas enfocadas respaldan que la disponibilidad y la creación aplican la regla `[inicio, fin)` de forma coherente.
 
 **Evidencia:** las pruebas están definidas en `tests/test_reservation_app.py`. Los comandos se ejecutaron en la terminal durante esta sesión; no se guardó una transcripción de terminal aparte.
 
-#### Episodio 3 — Comprobar cancelación y persistencia entre ejecuciones
+### Episodio 3 — Comprobar cancelación y persistencia entre ejecuciones
 
-Prueba el flujo de consola con un archivo JSON temporal propio, para no leer ni modificar el archivo de datos habitual. El nombre de solicitante y las fechas del siguiente ejemplo son datos sintéticos de prueba, no reservas reales. Ejecuta cada comando en la misma terminal de PowerShell:
+- **Objetivo y requisito:** comprobar que las reservas activas y canceladas persisten al ejecutar nuevos procesos, que cancelar conserva el registro y libera el horario, y que los casos de superposición y consecutivos cumplen las reglas.
+- **Contexto e instrucción:** la consigna oficial exige recuperación tras detener y reiniciar sin borrar datos. Se ejecutó el procedimiento CLI con `--data-file` temporal, solicitantes ficticios y sin modificar `inventory.json` ni el archivo de datos habitual.
+- **Acción / resultado observado:** cada comando se ejecutó en un proceso nuevo. La reserva superpuesta fue rechazada con código 1; la consecutiva se creó; la primera reserva mantuvo su ID y apareció como `cancelled`; la consecutiva siguió `active`; disponibilidad volvió a incluir `MIC-01` para el horario liberado.
+- **Decisión humana:** aceptado por la persona que entrega el 2026-10-24; la salida registrada confirma persistencia entre procesos, conservación de la cancelación y liberación del intervalo.
+- **Evidencia:** salida completa, versión de Python y códigos de salida en [evidence/episodio-3-cli-smoke.txt](./evidence/episodio-3-cli-smoke.txt).
 
-```powershell
-$dataFile = Join-Path $env:TEMP ("reservas-prueba-" + [guid]::NewGuid().ToString() + ".json")
-python --version
-python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Prueba ficticia" --start 2030-04-15T10:00 --end 2030-04-15T11:00
-python reservation_app.py --data-file $dataFile list
-```
+### Resultados de verificación
 
-Copia el ID que realmente imprimió `reserve` y úsalo en los comandos siguientes. La segunda reserva debe rechazarse por superposición; la consecutiva debe permitirse; después cancela la primera y comprueba con `list` que sigue en el historial como cancelada:
-
-```powershell
-python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Otra prueba ficticia" --start 2030-04-15T10:30 --end 2030-04-15T11:30
-python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Prueba consecutiva" --start 2030-04-15T11:00 --end 2030-04-15T12:00
-python reservation_app.py --data-file $dataFile cancel --id ID_REAL_COPIADO_DE_LA_SALIDA
-python reservation_app.py --data-file $dataFile list
-```
-
-El proceso de cada comando termina antes de iniciar el siguiente, así que `list` comprueba que los datos se recuperan del archivo. Conserva el archivo temporal mientras necesites verificar el resultado; no uses ni borres el archivo habitual `data/reservations.json` para esta prueba.
-
-#### Qué registrar en el episodio 3
-
-Al completar el episodio 3, registra solo lo que haya ocurrido:
-
-- **Objetivo y requisito:** qué comportamiento se revisó.
-- **Instrucción al agente:** la tarea concreta que se le pidió.
-- **Acción y resultado observado:** archivos modificados (si los hubo), comandos ejecutados y salida real; distingue las propuestas del agente de las acciones que efectivamente se ejecutaron.
-- **Decisión humana:** aceptado, corregido o rechazado, con un motivo breve.
-- **Evidencia:** enlaces a los archivos y, si se guardó, a una captura o transcripción de comandos sin datos personales innecesarios.
-
-Los resultados de pruebas y la versión de Python deben copiarse del entorno donde se ejecuten. Los ejemplos anteriores no son evidencia de reservas reales. Para usar reservas reales, utiliza únicamente datos autorizados para la entrega, minimiza datos personales y no alteres el inventario fijo.
-
-### Resultados de verificación ejecutados por la persona
-
-Completa esta tabla con resultados observados en el entorno de entrega. No confundas una afirmación del agente con una ejecución comprobada.
+Estos resultados fueron ejecutados por el agente en el entorno local descrito; no se atribuyen a la persona que entrega. El archivo de evidencia registra el procedimiento manual reproducible y sus resultados observados.
 
 | Comando o procedimiento | Versión de Python | Resultado observado |
 | --- | --- | --- |
-| `python -m unittest discover -s tests -v` | 3.13.14 | 9 pruebas pasaron |
-| `reserve` → `list` en otro proceso → `cancel` → `list` en otro proceso, usando `--data-file` temporal | 3.13.14 | La reserva activa y luego su estado cancelado persistieron tras reiniciar; `PERSISTENCE SMOKE TEST: OK` |
+| Cuatro pruebas enfocadas de disponibilidad, superposición, consecutivas y unidades distintas | 3.13.14 | 4 pruebas pasaron |
+| Prueba CLI con `--data-file` temporal; reservas, consultas, cancelación y `list` en procesos nuevos | 3.13.14 | Rechazó superposición (código 1), permitió la consecutiva, conservó la reserva cancelada y la activa y liberó el intervalo; evidencia en `evidence/episodio-3-cli-smoke.txt` |
+| `python -m unittest discover -s tests -v` | 3.13.14 | 9 pruebas pasaron tras actualizar la documentación |

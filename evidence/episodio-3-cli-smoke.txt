@@ -1,0 +1,53 @@
+Python: 3.13.14
+Procedimiento CLI de persistencia; solicitantes y reservas ficticios.
+Cada comando de aplicacion corre en un proceso nuevo con el mismo archivo JSON temporal.
+
+$ python reservation_app.py --data-file <TEMP_JSON> reserve --unit MIC-01 --requester Prueba ficticia --start 2030-04-15T10:00 --end 2030-04-15T11:00
+exit_code=0 (expected=0)
+Reserva creada: res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | active
+
+$ python reservation_app.py --data-file <TEMP_JSON> list
+exit_code=0 (expected=0)
+res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | active
+
+$ python reservation_app.py --data-file <TEMP_JSON> availability --start 2030-04-15T10:30 --end 2030-04-15T11:30
+exit_code=0 (expected=0)
+MIC-02 | Microscopio digital
+OSC-01 | Osciloscopio
+MUL-01 | Multímetro
+FUE-01 | Fuente de alimentación
+
+$ python reservation_app.py --data-file <TEMP_JSON> availability --start 2030-04-15T11:00 --end 2030-04-15T12:00
+exit_code=0 (expected=0)
+MIC-01 | Microscopio digital
+MIC-02 | Microscopio digital
+OSC-01 | Osciloscopio
+MUL-01 | Multímetro
+FUE-01 | Fuente de alimentación
+
+$ python reservation_app.py --data-file <TEMP_JSON> reserve --unit MIC-01 --requester Otra prueba ficticia --start 2030-04-15T10:30 --end 2030-04-15T11:30
+exit_code=1 (expected=1)
+[stderr] Error: La unidad ya tiene una reserva activa superpuesta.
+
+$ python reservation_app.py --data-file <TEMP_JSON> reserve --unit MIC-01 --requester Prueba consecutiva --start 2030-04-15T11:00 --end 2030-04-15T12:00
+exit_code=0 (expected=0)
+Reserva creada: res_3743c69cbc12 | MIC-01 (Microscopio digital) | Prueba consecutiva | 2030-04-15T11:00 a 2030-04-15T12:00 | active
+
+$ python reservation_app.py --data-file <TEMP_JSON> cancel --id res_868123f2572a
+exit_code=0 (expected=0)
+Reserva cancelada: res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | cancelled
+
+$ python reservation_app.py --data-file <TEMP_JSON> list
+exit_code=0 (expected=0)
+res_868123f2572a | MIC-01 (Microscopio digital) | Prueba ficticia | 2030-04-15T10:00 a 2030-04-15T11:00 | cancelled
+res_3743c69cbc12 | MIC-01 (Microscopio digital) | Prueba consecutiva | 2030-04-15T11:00 a 2030-04-15T12:00 | active
+
+$ python reservation_app.py --data-file <TEMP_JSON> availability --start 2030-04-15T10:00 --end 2030-04-15T11:00
+exit_code=0 (expected=0)
+MIC-01 | Microscopio digital
+MIC-02 | Microscopio digital
+OSC-01 | Osciloscopio
+MUL-01 | Multímetro
+FUE-01 | Fuente de alimentación
+
+RESULTADO: PASS - solapamiento rechazado; consecutiva permitida; cancelada conservada; activa persistida; cancelacion libero el horario.
