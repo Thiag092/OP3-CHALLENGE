@@ -59,28 +59,19 @@ res_3743c69cbc12 | MIC-01 (Microscopio digital) | Prueba consecutiva | 2030-04-1
 ## Registro de episodios, decisiones y delegación
 **Prompt Original:**:
 
-*Necesito adaptar este proyecto para hacer un sistema de reservas de equipos de laboratorio usando TypeScript, Bun y SQLite.*
+*Necesito una aplicación local de consola para reservar equipos de laboratorio. Usa Python 3.10 o posterior y, salvo que haya una razón justificada, solo la biblioteca estándar. Persiste las reservas en un archivo JSON local.*
 
-*El sistema tiene que manejar este inventario:*
+*El inventario inicial está definido en inventory.json y no se debe poder agregar, editar ni eliminar unidades desde la aplicación. Cada ID representa una unidad física distinta.*
 
-- *MIC-01: Microscopio digital*
-- *MIC-02: Microscopio digital*
-- *OSC-01: Osciloscopio*
-- *MUL-01: Multímetro*
-- *FUE-01: Fuente de alimentación*
+*La aplicación debe permitir consultar qué unidades están disponibles para un intervalo, crear una reserva y cancelarla. Cada reserva guarda un ID, unidad, equipo, solicitante ficticio, fecha y hora de inicio y fin, y estado.*
 
-*Quiero poder consultar si un equipo está disponible, crear una reserva y cancelarla. Cada reserva tiene que guardar un ID, el equipo, el nombre del solicitante, fecha y hora de inicio y fin, y su estado.*
-*No se pueden aceptar reservas superpuestas para el mismo equipo, pero sí horarios consecutivos. Por ejemplo, si MIC-01 está reservado de 10:00 a 11:00, no se puede reservar de 10:30 a 11:30, pero sí de 11:00 a 12:00. Equipos diferentes pueden reservarse al mismo tiempo.*
+*Trata los intervalos como [inicio, fin): para la misma unidad, rechaza reservas activas superpuestas, permite reservas consecutivas y permite reservar unidades distintas al mismo tiempo. Las canceladas deben conservar el mismo ID y sus datos originales, pero no bloquear disponibilidad.*
 
-*Cuando se cancela una reserva no quiero que se elimine, sino que quede guardada como cancelada y que ese horario vuelva a estar disponible.*
+*Valida que la unidad exista, que el solicitante no esté vacío ni compuesto solo por espacios, que las fechas tengan formato AAAA-MM-DDTHH:MM y que el inicio sea anterior al fin. Usa hora local sin zona horaria. Documenta cómo se tratan fechas pasadas y límites de duración o anticipación.*
 
-*Los datos tienen que persistir en SQLite aunque cierre y vuelva a ejecutar la aplicación.*
+*Primero inspecciona el repositorio y sus instrucciones. Haz cambios pequeños y explica qué archivos modificas y por qué. No agregues servicios externos ni dependencias innecesarias. Incluye pruebas automatizadas para creación válida, entradas inválidas, superposición, intervalos consecutivos, unidades distintas, cancelación, liberación del horario y persistencia tras reiniciar. Ejecuta `python -m unittest discover -s tests -v` y comunica el resultado observado, sin afirmar pruebas no ejecutadas.*
 
-*También necesito pruebas automáticas para comprobar reservas válidas, superposiciones, horarios consecutivos, equipos distintos al mismo tiempo, datos inválidos, cancelaciones y persistencia.*
-
-*Primero revisá cómo está armado el proyecto actual y tratá de reutilizar su estructura. Después hacé los cambios necesarios de forma progresiva y explicame qué archivos vas modificando y por qué. Ejecutá las pruebas para comprobar que realmente funciona.*
-
-*Por último, ayudame a dejar un README donde se explique cómo ejecutar el proyecto, cómo correr las pruebas, las decisiones que tomamos y el uso que hice del agente durante el desarrollo.*
+*Actualiza el README con la especificación, decisiones técnicas, instalación y comandos, persistencia, límites, pruebas y evidencia real del uso del agente. No inventes resultados ni datos personales; usa solicitantes ficticios.*
 ##
 ### Episodio 1 — Base funcional
 
@@ -120,3 +111,20 @@ res_3743c69cbc12 | MIC-01 (Microscopio digital) | Prueba consecutiva | 2030-04-1
 | Cuatro pruebas enfocadas de disponibilidad, superposición, consecutivas y unidades distintas | 3.13.14 | 4 pruebas pasaron |
 | Prueba CLI con `--data-file` temporal; reservas, consultas, cancelación y `list` en procesos nuevos | 3.13.14 | Rechazó superposición (código 1), permitió la consecutiva, conservó la reserva cancelada y la activa y liberó el intervalo; evidencia en `evidence/episodio-3-cli-smoke.txt` |
 | `python -m unittest discover -s tests -v` | 3.13.14 | 9 pruebas pasaron tras actualizar la documentación |
+
+
+
+**Prueba**
+
+test_active_and_cancelled_records_survive_restart (test_reservation_app.ReservationServiceTests.test_active_and_cancelled_records_survive_restart) ... ok
+test_allows_consecutive_reservations (test_reservation_app.ReservationServiceTests.test_allows_consecutive_reservations) ... ok
+test_allows_same_time_on_different_units (test_reservation_app.ReservationServiceTests.test_allows_same_time_on_different_units) ... ok
+test_availability_uses_the_same_interval_rules (test_reservation_app.ReservationServiceTests.test_availability_uses_the_same_interval_rules) ... ok
+test_cancel_keeps_record_and_releases_interval (test_reservation_app.ReservationServiceTests.test_cancel_keeps_record_and_releases_interval) ... ok
+test_creates_valid_reservation (test_reservation_app.ReservationServiceTests.test_creates_valid_reservation) ... ok
+test_rejects_invalid_interval (test_reservation_app.ReservationServiceTests.test_rejects_invalid_interval) ... ok
+test_rejects_overlapping_active_reservation (test_reservation_app.ReservationServiceTests.test_rejects_overlapping_active_reservation) ... ok
+test_rejects_unknown_unit_and_blank_requester (test_reservation_app.ReservationServiceTests.test_rejects_unknown_unit_and_blank_requester) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.066s
