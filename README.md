@@ -47,7 +47,7 @@ Ejemplo de disponibilidad: si `MIC-01` está reservado de 10:00 a 11:00, otra so
 
 **Instrucciones y contexto:** `.github/copilot-instructions.md` fija reglas específicas de intervalos consecutivos, disponibilidad, cancelación, persistencia y reporte honesto de pruebas. El contexto fue la consigna `challenge-agents.pdf`; se excluyeron credenciales, datos personales reales y servicios externos.
 
-**Herramientas, controles y adaptación:** el agente leyó la consigna, creó archivos en el espacio de trabajo y ejecutó pruebas locales. La adaptación verificable es la instrucción de modelar intervalos como `[inicio, fin)`, aplicada en `ReservationService._has_conflict` y comprobada por `test_allows_consecutive_reservations`. La persona que entrega debe revisar el diff y volver a ejecutar las pruebas antes de aceptar los cambios. El agente no puede sustituir esa revisión humana.
+**Herramientas, controles y adaptación:** el agente leyó la consigna, creó archivos en el espacio de trabajo y ejecutó pruebas locales. La adaptación verificable es la instrucción de modelar intervalos como `[inicio, fin)`, aplicada en `ReservationService._has_conflict` y comprobada por `test_allows_consecutive_reservations`. 
 
 ## Registro de decisiones y delegación
 
