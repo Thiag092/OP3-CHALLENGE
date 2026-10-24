@@ -61,9 +61,55 @@ Registra aquí solo episodios que hayan ocurrido. No pegues conversaciones priva
 - **Decisión humana:** pendiente de revisión de la persona que entrega; no se afirma aceptación.
 - **Evidencia:** `reservation_app.py`, `inventory.json`, `tests/test_reservation_app.py` y el resultado de `python -m unittest discover -s tests -v` que se debe registrar abajo tras ejecutarlo.
 
-### Episodios 2 y 3 — Completar con uso real
+### Registro de episodios 2 y 3
 
-Todavía no registrados. Para cumplir la consigna, usa el agente sobre este repositorio en dos tareas concretas (por ejemplo, revisar entradas inválidas y revisar el procedimiento de reinicio), decide si aceptas/corriges/rechazas cada resultado y agrega aquí la instrucción usada, la decisión y un enlace a evidencia comprobable. No marques estos episodios como realizados hasta que sucedan.
+El episodio 2 se realizó en esta sesión y se documenta abajo. El episodio 3 sigue pendiente; no se afirma que se haya ejecutado.
+
+#### Episodio 2 — Revisar disponibilidad y límites de intervalos
+
+**Objetivo e instrucción:** revisar si la consulta de disponibilidad y la creación de reservas aplican la misma regla para intervalos `[inicio, fin)`, y comprobar superposición, horarios consecutivos y unidades distintas. No cambiar `inventory.json` ni agregar funciones para editar el inventario; si hubiera una carencia, añadir una prueba enfocada y una corrección mínima, y luego ejecutar la suite completa.
+
+**Acción y resultado observado:** se inspeccionaron `ReservationService._has_conflict`, `available_units` y `create`. Ambas operaciones usan la misma detección de conflicto: solo cuenta reservas activas de la misma unidad y usa `inicio_nuevo < fin_existente` junto con `inicio_existente < fin_nuevo`. No se detectó una carencia, así que no se modificó código ni se necesitó agregar una prueba. `inventory.json` no se modificó.
+
+**Pruebas ejecutadas:** cuatro pruebas enfocadas pasaron: `test_availability_uses_the_same_interval_rules`, `test_rejects_overlapping_active_reservation`, `test_allows_consecutive_reservations` y `test_allows_same_time_on_different_units`. Después, `python -m unittest discover -s tests -v` ejecutó la suite completa: 9 pruebas pasaron. Entorno observado: Python 3.13.14. `git diff --check` no reportó errores.
+
+**Decisión humana:** no se informó una decisión separada sobre aceptar, corregir o rechazar; la revisión no encontró cambios que requirieran esa decisión.
+
+**Evidencia:** las pruebas están definidas en `tests/test_reservation_app.py`. Los comandos se ejecutaron en la terminal durante esta sesión; no se guardó una transcripción de terminal aparte.
+
+#### Episodio 3 — Comprobar cancelación y persistencia entre ejecuciones
+
+Prueba el flujo de consola con un archivo JSON temporal propio, para no leer ni modificar el archivo de datos habitual. El nombre de solicitante y las fechas del siguiente ejemplo son datos sintéticos de prueba, no reservas reales. Ejecuta cada comando en la misma terminal de PowerShell:
+
+```powershell
+$dataFile = Join-Path $env:TEMP ("reservas-prueba-" + [guid]::NewGuid().ToString() + ".json")
+python --version
+python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Prueba ficticia" --start 2030-04-15T10:00 --end 2030-04-15T11:00
+python reservation_app.py --data-file $dataFile list
+```
+
+Copia el ID que realmente imprimió `reserve` y úsalo en los comandos siguientes. La segunda reserva debe rechazarse por superposición; la consecutiva debe permitirse; después cancela la primera y comprueba con `list` que sigue en el historial como cancelada:
+
+```powershell
+python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Otra prueba ficticia" --start 2030-04-15T10:30 --end 2030-04-15T11:30
+python reservation_app.py --data-file $dataFile reserve --unit MIC-01 --requester "Prueba consecutiva" --start 2030-04-15T11:00 --end 2030-04-15T12:00
+python reservation_app.py --data-file $dataFile cancel --id ID_REAL_COPIADO_DE_LA_SALIDA
+python reservation_app.py --data-file $dataFile list
+```
+
+El proceso de cada comando termina antes de iniciar el siguiente, así que `list` comprueba que los datos se recuperan del archivo. Conserva el archivo temporal mientras necesites verificar el resultado; no uses ni borres el archivo habitual `data/reservations.json` para esta prueba.
+
+#### Qué registrar en el episodio 3
+
+Al completar el episodio 3, registra solo lo que haya ocurrido:
+
+- **Objetivo y requisito:** qué comportamiento se revisó.
+- **Instrucción al agente:** la tarea concreta que se le pidió.
+- **Acción y resultado observado:** archivos modificados (si los hubo), comandos ejecutados y salida real; distingue las propuestas del agente de las acciones que efectivamente se ejecutaron.
+- **Decisión humana:** aceptado, corregido o rechazado, con un motivo breve.
+- **Evidencia:** enlaces a los archivos y, si se guardó, a una captura o transcripción de comandos sin datos personales innecesarios.
+
+Los resultados de pruebas y la versión de Python deben copiarse del entorno donde se ejecuten. Los ejemplos anteriores no son evidencia de reservas reales. Para usar reservas reales, utiliza únicamente datos autorizados para la entrega, minimiza datos personales y no alteres el inventario fijo.
 
 ### Resultados de verificación ejecutados por la persona
 
